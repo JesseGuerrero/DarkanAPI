@@ -4,10 +4,11 @@ import { Observable } from "rxjs";
 import { Inject, Injectable } from "@nestjs/common";
 import { AxiosResponse } from "axios";
 import * as config from '../../config';
+import { HighscoresService } from "../highscores/highscores.service";
 
 @Injectable()
 export class Temporal_HSService {
-  constructor(private readonly httpService: HttpService, @Inject(WORLD_MONGODB_PROVIDER) private readonly db: any) {}
+  constructor(private readonly httpService: HttpService, private readonly highscoresService: HighscoresService, @Inject(WORLD_MONGODB_PROVIDER) private readonly db: any) {}
 
 
   async get(daysBackward = 1, page = 1, limit = 25, gamemode = 'all', skill = -1) {
@@ -36,8 +37,29 @@ export class Temporal_HSService {
     return await this.db.collection('temporalHS').find(filter, { projection: { username: 0 } }).sort(sort).skip(startIndex).limit(limit).toArray();
   }
 
-  async save(highscore) {
-      let response = await this.db.listCollections({name: "temporalHS"})
-      return response.data;
+  async collectionExists(name) {
+    return await this.db.listCollections({name: name}).hasNext();
+  }
+
+  async save() {//https://weblog.west-wind.com/posts/2014/jan/06/javascript-json-date-parsing-and-real-dates
+      if(!this.collectionExists("temporalHS")) {
+        this.db.createCollection("temporalHS", {strict:true})
+      }
+      let todayHS = {"date": new Date(), "highscore": await this.highscoresService.get(1, 9999999)}
+
+      // console.log(todayHS)
+      this.db.collection("temporalHS").insertOne(todayHS)
+      this.db.collection("temporalHS").find().forEach(function(doc) {
+        if(doc) {
+          let docDate = new Date(doc.date)
+          // let deleteDate = new Date(new Date().setDate(new Date().getDate() - 90));
+          let deleteDate = new Date();
+          deleteDate.setSeconds(deleteDate.getSeconds() - 30)
+          if(docDate < deleteDate) {
+            this.db.collection("temporalHS").deleteOne(doc)
+          }
+        }
+      })
+      return {};
   }
 }

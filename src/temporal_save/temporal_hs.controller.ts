@@ -9,7 +9,8 @@ export class TemporalHSController {
   @Post('save')//TODO:LOOK at this service and copy it. Run the looping script from the website...
   async save() {
     console.log("save")
-    return this.TemporalHSService.save(await this.highscoresService.get(1, 9999999));
+    console.log(await this.TemporalHSService.save())
+    return {"hi":"bye"}
   }
 
   @Get()
