@@ -4,7 +4,7 @@ import { HighscoresService } from "../highscores/highscores.service";
 
 @Controller('temporal-hs')
 export class TemporalHSController {
-  constructor(private readonly TemporalHSService: Temporal_HSService, private readonly highscoresService: HighscoresService) {}
+  constructor(private readonly TemporalHSService: Temporal_HSService) {}
 
   @Post('save')//TODO:LOOK at this service and copy it. Run the looping script from the website...
   async save() {
@@ -14,7 +14,7 @@ export class TemporalHSController {
   }
 
   @Get()
-  async getOverall(@Query('days-backward') daysBackward = 1, @Query('page') page = 1, @Query('limit') limit = 25, @Query('gamemode') gamemode = 'all', @Query('skill') skill = -1) {
+  async getOverall(@Query('days-backward') daysBackward = 0, @Query('page') page = 1, @Query('limit') limit = 25, @Query('gamemode') gamemode = 'all', @Query('skill') skill = -1) {
     return await this.TemporalHSService.get(daysBackward, page, limit, gamemode, skill);
   }
 

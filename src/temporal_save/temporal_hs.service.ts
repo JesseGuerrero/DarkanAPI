@@ -10,31 +10,46 @@ import { HighscoresService } from "../highscores/highscores.service";
 export class Temporal_HSService {
   constructor(private readonly httpService: HttpService, private readonly highscoresService: HighscoresService, @Inject(WORLD_MONGODB_PROVIDER) private readonly db: any) {}
 
+  checkday(date, daysBack) {
+    let docDate = new Date(date)
+    let pastDoc = new Date(new Date().setDate(new Date().getDate() - daysBack));
+    if (docDate.getDate() == pastDoc.getDate() && docDate.getMonth() == pastDoc.getMonth() && docDate.getFullYear() == pastDoc.getFullYear())
+      return true
+  }
 
-  async get(daysBackward = 1, page = 1, limit = 25, gamemode = 'all', skill = -1) {
+  async get(daysBackward = 0, page = 1, limit = 25, gamemode = 'all', skill = -1) {
     page = Number(page);
     limit = Number(limit);
+    let iron = false
     const startIndex = (page - 1) * limit;
-    let filter = {};
     switch (gamemode) {
       case 'ironman':
-        filter = { ironman: true };
-        break;
-      case 'regular':
-        filter = { ironman: false };
-        break;
-      default:
-        filter = {};
+        iron = true
         break;
     }
-    let sort = {};
-    if (!skill || skill < 0)
-      sort = { totalLevel: -1, totalXp: -1 };
-    else {
-      sort = {};
-      sort['xp.' + skill] = -1;
+    let temporalHS = await this.db.collection('temporalHS').find().toArray();
+    for(let i = 0; i < temporalHS.length; i++) {
+      if (this.checkday(temporalHS[i].date, daysBackward)) {
+        let hs = temporalHS[i].highscore
+        if(iron) {
+          let ironHS = []
+          for (let j = 0; j < hs.length; j++) {
+            let player = hs[j]
+            if(player.ironman == true)
+              ironHS.push(player)
+          }
+          hs = ironHS
+        }
+        let pagedHS = []
+        for(let j = startIndex; j < startIndex + limit; j++) {
+          if(hs[j] != null)
+            pagedHS.push(hs[j])
+        }
+        hs = pagedHS
+        return hs;
+      }
     }
-    return await this.db.collection('temporalHS').find(filter, { projection: { username: 0 } }).sort(sort).skip(startIndex).limit(limit).toArray();
+    return {};
   }
 
   async collectionExists(name) {
@@ -42,21 +57,20 @@ export class Temporal_HSService {
   }
 
   async save() {//https://weblog.west-wind.com/posts/2014/jan/06/javascript-json-date-parsing-and-real-dates
+    const database = this.db;
       if(!this.collectionExists("temporalHS")) {
-        this.db.createCollection("temporalHS", {strict:true})
+        database.createCollection("temporalHS", {strict:true})
       }
       let todayHS = {"date": new Date(), "highscore": await this.highscoresService.get(1, 9999999)}
 
       // console.log(todayHS)
-      this.db.collection("temporalHS").insertOne(todayHS)
-      this.db.collection("temporalHS").find().forEach(function(doc) {
+      database.collection("temporalHS").insertOne(todayHS)
+      database.collection("temporalHS").find().forEach(function(doc) {
         if(doc) {
           let docDate = new Date(doc.date)
-          // let deleteDate = new Date(new Date().setDate(new Date().getDate() - 90));
-          let deleteDate = new Date();
-          deleteDate.setSeconds(deleteDate.getSeconds() - 30)
+          let deleteDate = new Date(new Date().setDate(new Date().getDate() - 90));
           if(docDate < deleteDate) {
-            this.db.collection("temporalHS").deleteOne(doc)
+            database.collection("temporalHS").deleteOne(doc)
           }
         }
       })
