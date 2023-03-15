@@ -35,3 +35,5 @@ lerna-debug.log*
 
 config.js
 config.json
+/csr.pem
+/key.pem

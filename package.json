@@ -33,6 +33,9 @@
     "class-validator": "^0.13.2",
     "cross-fetch": "^3.1.5",
     "crypto": "^1.0.1",
+    "dompurify": "^2.0.8",
+    "jsdom": "^21.1.1",
+    "marked": "^0.8.0",
     "mongodb": "^4.8.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
@@ -40,6 +43,8 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "@types/sanitize-html": "^2.9.0",
+    "slugify": "^1.4.0",
     "swagger-ui-express": "^4.5.0"
   },
   "devDependencies": {
