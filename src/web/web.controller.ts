@@ -23,7 +23,7 @@ export class WebController {
   }
 
   @Get()
-  async getOverall(@Query('page') page = 1, @Query('limit') limit = 6, @Query('type') type = 0) {
+  async getNews(@Query('page') page = 1, @Query('limit') limit = 6, @Query('type') type = 0) {
     return await this.webService.get(page, limit, type);
   }
 

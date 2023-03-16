@@ -31,7 +31,6 @@ export class WebService {
       let articleCopy = article
       articleCopy["sanitizedHtml"] = articleCopy.markdown
       this.db.collection('articles').updateOne({_id: new ObjectId(id)}, { $set: articleCopy})
-      console.log(articleCopy)
     } catch(e) {
       console.log(e)
       throw new BadRequestException(e.response.data.error);
