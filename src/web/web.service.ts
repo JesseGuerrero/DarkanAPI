@@ -54,22 +54,13 @@ export class WebService {
   async get(page = 1, limit = 6, type = 0) {
     page = Number(page);
     limit = Number(limit);
+    type = Number(type)
     const startIndex = (page - 1) * limit;
     let filter = {};
-    switch(type) {
-      case 0:
-        filter = { };
-        break;
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-        filter = { type: type };
-        break;
-      default:
-        filter = {};
-        break;
-    }
+
+    if(type >= 1 && type <= 4)
+      filter = { type : type };
+
     let sort = { createdAt: 'desc' };
     return await this.db.collection('articles').find(filter).sort(sort).skip(startIndex).limit(limit).toArray();
   }
