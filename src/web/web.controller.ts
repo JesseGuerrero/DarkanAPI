@@ -27,6 +27,16 @@ export class WebController {
     return await this.webService.get(page, limit, type);
   }
 
+  @Get("get-article/:id")
+  async getArticle(@Param('id') id : string) {
+    return await this.webService.getById(id);
+  }
+
+  @Get("get-article-slug/:slug")
+  async getArticleSlug(@Param('slug') slug : string) {
+    return await this.webService.getBySlug(slug);
+  }
+
   @Get('/count')
   async getCount() {
     return await this.webService.getCount();

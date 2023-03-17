@@ -65,6 +65,14 @@ export class WebService {
     return await this.db.collection('articles').find(filter).sort(sort).skip(startIndex).limit(limit).toArray();
   }
 
+  async getById(id: string) {
+    return await this.db.collection('articles').findOne({ "_id": new ObjectId(id) })
+  }
+
+  async getBySlug(slug: string) {
+    return await this.db.collection('articles').findOne({ "slug": slug })
+  }
+
   async getOneOrFail(title: string) {
     return await this.db.collection('articles').find({slug: slugify(title, { lower: true, strict: true })}).toArray()
   }
