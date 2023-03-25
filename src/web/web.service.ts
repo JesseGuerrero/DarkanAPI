@@ -19,6 +19,7 @@ export class WebService {
       articleCopy["slug"] = slugify(articleCopy.title, { lower: true, strict: true })
       articleCopy["createdAt"] = new Date(Date.now())
       articleCopy["sanitizedHtml"] = articleCopy.markdown
+      articleCopy["type"] = Number(articleCopy.type)
       this.db.collection('articles').insertOne(articleCopy)
     } catch(e) {
       console.log(e)
