@@ -5,14 +5,14 @@ import { AuthModule } from './auth/auth.module';
 import { PlayersModule } from './players/players.module';
 import { HighscoresModule } from './highscores/highscores.module';
 import { GEModule } from './ge/ge.module';
-import { WebModule } from './web/web.module';
+import { ArticlesModule } from './web/web.module';
 
 @Module({
   imports: [
     GEModule,
     HighscoresModule,
     PlayersModule,
-    WebModule,
+    ArticlesModule,
     AccountsModule,
     LogsModule,
     AuthModule

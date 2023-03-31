@@ -1,11 +1,11 @@
 import {Body, Controller, Get, Param, Post, Put, Query} from '@nestjs/common';
-import { WebService } from './web.service';
-import {CreateArticleDto} from "../web/dto/createArticleDto";
+import { ArticlesService } from './articles.service';
+import {CreateArticleDto} from "./dto/createArticleDto";
 import {UpdateArticleDto} from "./dto/updateArticleDto";
 
 @Controller('web')
-export class WebController {
-  constructor(private readonly webService: WebService) {}
+export class ArticlesController {
+  constructor(private readonly webService: ArticlesService) {}
 
   @Post('edit/:id')
   async edit(@Param('id') id : string, @Body() article : UpdateArticleDto) {

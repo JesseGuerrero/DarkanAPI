@@ -4,13 +4,11 @@ import { WORLD_MONGODB_PROVIDER } from 'src/constants';
 import {CreateArticleDto} from "./dto/createArticleDto";
 import slugify from 'slugify';
 import {ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface} from "class-validator";
-import {Db, MongoClient, ObjectId} from "mongodb";
-import * as config from '../../config';
-import sanitize from "sanitize-html";
 import {UpdateArticleDto} from "./dto/updateArticleDto";
+import {ObjectId} from "mongodb";
 
 @Injectable()
-export class WebService {
+export class ArticlesService {
   constructor(private readonly httpService: HttpService, @Inject(WORLD_MONGODB_PROVIDER) private readonly db: any) {}
 
   async create(article: CreateArticleDto) {
@@ -82,7 +80,7 @@ export class WebService {
 @ValidatorConstraint({ name: 'TitleExists', async: true })
 @Injectable()
 export class TitleExistsRule implements ValidatorConstraintInterface {
-  constructor(private webService: WebService) {}
+  constructor(private webService: ArticlesService) {}
 
   // @ts-ignore
   async validate(title: string) {
