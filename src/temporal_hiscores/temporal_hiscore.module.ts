@@ -9,4 +9,4 @@ import {HttpModule} from "@nestjs/axios";
   controllers: [TemporalController],
   providers: [TemporalHiscoreService, TitleExistsRule],
 })
-export class ArticlesModule {}
+export class TemporalModule {}

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { WorldMongoDbModule } from 'src/mongo/world_mongodb.module';
-import { ArticlesController } from './web.controller';
-import { ArticlesService, TitleExistsRule } from './web.service';
+import { ArticlesController } from './articles.controller';
+import { ArticlesService, TitleExistsRule } from './articles.service';
 import {HttpModule} from "@nestjs/axios";
 
 @Module({

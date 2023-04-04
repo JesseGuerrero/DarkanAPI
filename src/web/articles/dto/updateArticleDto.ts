@@ -1,7 +1,7 @@
 import {IsEmail, IsNotEmpty, Validate} from 'class-validator';
 import { IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
-import {TitleExistsRule} from "../web.service";
+import {TitleExistsRule} from "../articles.service";
 
 export class UpdateArticleDto {
     @IsNotEmpty()

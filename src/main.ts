@@ -1,12 +1,12 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as fs from 'fs';
-import * as config from '../config.js';
 import {join} from "path";
 import {NestExpressApplication} from "@nestjs/platform-express";
 import {useContainer} from "class-validator";
+import {startDaemonTemporalHiscores} from "./temporal_hiscores/temporal_daemon";
 
+let PORT = 8443
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     // httpsOptions: {
@@ -22,6 +22,9 @@ async function bootstrap() {
     prefix: '/public',
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-  await app.listen(8443);
+
+  startDaemonTemporalHiscores(PORT)
+
+  await app.listen(PORT);
 }
 bootstrap();
