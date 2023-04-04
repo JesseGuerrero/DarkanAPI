@@ -16,8 +16,8 @@ export function startDaemonTemporalHiscores(PORT : Number) {
             let usernameHiscore = {}
             for(let i = 0; i < hiscore.length; i++) {
                 usernameHiscore[hiscore[i].displayName] = {
-                    totalLevel: hiscore[i].totalLevel,
-                    totalXp: hiscore[i].totalXp,
+                    levelDifference: hiscore[i].totalLevel,
+                    xpDifference: hiscore[i].totalXp,
                     xp: hiscore[i].xp
                 }
             }
@@ -33,7 +33,7 @@ export function startDaemonTemporalHiscores(PORT : Number) {
                         dateUpdated: todaysDate,
                     }
                     playerData[todaysDate] = {
-                        totalLevel: hiscore[i].totalLevel,
+                        levelDifference: hiscore[i].totalLevel,
                         totalXP: hiscore[i].totalXp,
                         xp: hiscore[i].xp
                     }
@@ -43,7 +43,7 @@ export function startDaemonTemporalHiscores(PORT : Number) {
                     if(player["dateUpdated"] != todaysDate) {
                         player["dateUpdated"] = todaysDate
                         player[todaysDate] = {
-                            totalLevel: hiscore[i].totalLevel,
+                            levelDifference: hiscore[i].totalLevel,
                             totalXP: hiscore[i].totalXp,
                             xp: hiscore[i].xp
                         }

@@ -4,12 +4,13 @@ import { WORLD_MONGODB_PROVIDER } from 'src/constants';
 
 import slugify from 'slugify';
 import {ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface} from "class-validator";
+import {Utils} from "../util";
 
 @Injectable()
 export class TemporalHiscoreService {
   constructor(private readonly httpService: HttpService, @Inject(WORLD_MONGODB_PROVIDER) private readonly db: any) {}
 
-  async get(daysBack = 1, page = 1, limit = 6) {
+  async get(daysBack = 1, page = 1, limit = 6, skill = -1) {
     daysBack = Number(daysBack)
     page = Number(page);
     limit = Number(limit);
@@ -33,27 +34,42 @@ export class TemporalHiscoreService {
     Object.keys(todaySnapshot).forEach(function (key) {
       let playerObject = {}
       playerObject[key] = {
-        totalXp: -1,
-        totalLevel: 0
+        xpDifference: -1,
+        levelDifference: 0
       }
       if (daysBackSnapshot[key] == undefined) {
         snapshot.push(playerObject)
         return;
       }
-      playerObject[key] = {
-        totalXp: (todaySnapshot[key].totalXp - daysBackSnapshot[key].totalXp),
-        totalLevel: (todaySnapshot[key].totalLevel - daysBackSnapshot[key].totalLevel)
-      }
+      if(skill == -1)
+        playerObject[key] = {
+          xpDifference: (todaySnapshot[key].totalXp - daysBackSnapshot[key].totalXp),
+          levelDifference: (todaySnapshot[key].totalLevel - daysBackSnapshot[key].totalLevel)
+        }
+      else
+        playerObject[key] = {
+          xpDifference: (todaySnapshot[key].xp[skill] - daysBackSnapshot[key].xp[skill]),
+          levelDifference: (Utils.getSkillLevelByXP(todaySnapshot[key].xp[skill], skill) - Utils.getSkillLevelByXP(daysBackSnapshot[key].xp[skill], skill))
+        }
       snapshot.push(playerObject)
     });
 
     snapshot.sort((a, b) => {
-      if(a[Object.keys(a)[0]].totalXp == b[Object.keys(b)[0]].totalXp)
-        return 0
-      if(a[Object.keys(a)[0]].totalXp > b[Object.keys(b)[0]].totalXp)
-        return -1
-      else
-        return 1
+      if(skill == -1) {
+        if (a[Object.keys(a)[0]].totalXp == b[Object.keys(b)[0]].totalXp)
+          return 0
+        if (a[Object.keys(a)[0]].totalXp > b[Object.keys(b)[0]].totalXp)
+          return -1
+        else
+          return 1
+      } else {
+        if (a[Object.keys(a)[0]].xp[skill] == b[Object.keys(b)[0]].xp[skill])
+          return 0
+        if (a[Object.keys(a)[0]].xp[skill] > b[Object.keys(b)[0]].xp[skill])
+          return -1
+        else
+          return 1
+      }
     })
     const startIndex = (page - 1) * limit;
     snapshot = snapshot.slice(startIndex, startIndex+limit)

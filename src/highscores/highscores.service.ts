@@ -28,7 +28,7 @@ export class HighscoresService {
     }
     let sort = {};
     if (!skill || skill < 0)
-      sort = { totalLevel: -1, totalXp: -1 };
+      sort = { levelDifference: -1, xpDifference: -1 };
     else {
       sort = { };
       sort['xp.'+skill] = -1;

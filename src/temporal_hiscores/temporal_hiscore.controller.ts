@@ -8,8 +8,8 @@ export class TemporalController {
   constructor(private readonly temporalHiscoreService: TemporalHiscoreService) {}
 
   @Get('/overall')
-  async getTotalTemporalHiscore(@Query('days-back') daysBack = 1, @Query('page') page = 1, @Query('limit') limit = 6) {
-    return await this.temporalHiscoreService.get(daysBack, page, limit);
+  async getTotalTemporalHiscore(@Query('days-back') daysBack = 1, @Query('page') page = 1, @Query('limit') limit = 6, @Query('skill') skill = -1) {
+    return await this.temporalHiscoreService.get(daysBack, page, limit, skill);
   }
 
   @Get('/player')
