@@ -13,8 +13,8 @@ export class TemporalController {
   }
 
   @Get('/player')
-  async getPlayerTemporalHiscore(@Query('username') username = '', @Query('days') days = 1, @Query('page') page = 1, @Query('limit') limit = 6) {
-    return await this.temporalHiscoreService.getPlayer(username, days, page, limit);
+  async getPlayerTemporalHiscore(@Query('username') username = '', @Query('daysBack') daysBack = 1) {
+    return await this.temporalHiscoreService.getPlayer(username, daysBack);
   }
 
 }

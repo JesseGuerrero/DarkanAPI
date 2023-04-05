@@ -63,7 +63,6 @@ export class TemporalHiscoreService {
       else
         return 1
     })
-    console.log(snapshot)
 
     const startIndex = (page - 1) * limit;
     snapshot = snapshot.slice(startIndex, startIndex+limit)
@@ -72,19 +71,37 @@ export class TemporalHiscoreService {
   }
 
 
-  async getPlayer(username: string, days = 1, page = 1, limit = 6) {
-    days = Number(days)
-    page = Number(page);
-    limit = Number(limit);
-    const startIndex = (page - 1) * limit;
-    let filter = {};
+  async getPlayer(username = "", daysBack = 1) {
+    daysBack = Number(daysBack)
+    username = Utils.formatNameForDisplay(username)
+    const todaysDate = new Date().toDateString()
+    let date = (new Date())
+    date.setDate(date.getDate() - daysBack)
+    const pastDate = date.toDateString()
 
-    filter = {
-      username : username,
-      days: days
-    };
-    return await this.db.collection('temporal').find(filter).skip(startIndex).limit(limit).toArray();
+    let filter = {username: username};
+    let playerData = await this.db.collection('temporalPlayer').find(filter).toArray();
+    if (playerData.length == 0)
+      return {}
+    playerData = playerData[0]
+    const todaysData = playerData[todaysDate]
+    const pastData = playerData[pastDate]
+
+    if (todaysData == undefined || pastData == undefined)
+      return {}
+
+    let xpDifferential = []
+    for (let i = 0; i < todaysData.xp.length; i++)
+      xpDifferential[i] = todaysData.xp[i] - pastData.xp[i]
+    let differentialData = {
+      daysBack: daysBack,
+      totalXp: todaysData.totalXP - pastData.totalXP,
+      totalLevel: todaysData.totalLevel - pastData.totalLevel,
+      xpDifferential: xpDifferential
+    }
+    return differentialData
   }
+
 
   async getOneOrFail(title: string) {
     return await this.db.collection('temporal').find({slug: slugify(title, { lower: true, strict: true })}).toArray()
