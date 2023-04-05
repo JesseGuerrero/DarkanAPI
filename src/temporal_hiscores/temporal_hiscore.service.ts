@@ -14,6 +14,7 @@ export class TemporalHiscoreService {
     daysBack = Number(daysBack)
     page = Number(page);
     limit = Number(limit);
+    skill = Number(skill)
     let response = {
       daysBack: daysBack,
       snapshot: []
@@ -55,22 +56,15 @@ export class TemporalHiscoreService {
     });
 
     snapshot.sort((a, b) => {
-      if(skill == -1) {
-        if (a[Object.keys(a)[0]].totalXp == b[Object.keys(b)[0]].totalXp)
-          return 0
-        if (a[Object.keys(a)[0]].totalXp > b[Object.keys(b)[0]].totalXp)
-          return -1
-        else
-          return 1
-      } else {
-        if (a[Object.keys(a)[0]].xp[skill] == b[Object.keys(b)[0]].xp[skill])
-          return 0
-        if (a[Object.keys(a)[0]].xp[skill] > b[Object.keys(b)[0]].xp[skill])
-          return -1
-        else
-          return 1
-      }
+      if (a[Object.keys(a)[0]].xpDifference == b[Object.keys(b)[0]].xpDifference)
+        return 0
+      if (a[Object.keys(a)[0]].xpDifference > b[Object.keys(b)[0]].xpDifference)
+        return -1
+      else
+        return 1
     })
+    console.log(snapshot)
+
     const startIndex = (page - 1) * limit;
     snapshot = snapshot.slice(startIndex, startIndex+limit)
     response["snapshot"] = snapshot
