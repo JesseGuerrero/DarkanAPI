@@ -13,8 +13,8 @@ async function updateDB() {
         let usernameHiscore = {}
         for(let i = 0; i < hiscore.length; i++) {
             usernameHiscore[hiscore[i].displayName] = {
-                levelDifference: hiscore[i].totalLevel,
-                xpDifference: hiscore[i].totalXp,
+                totalLevel: hiscore[i].totalLevel,
+                totalXp: hiscore[i].totalXp,
                 xp: hiscore[i].xp
             }
         }
@@ -30,9 +30,9 @@ async function updateDB() {
                     dateUpdated: todaysDate,
                 }
                 playerData[todaysDate] = {
-                    levelDifference: hiscore[i].totalLevel,
+                    totalLevel: hiscore[i].totalLevel,
                     totalXP: hiscore[i].totalXp,
-                    xp: hiscore[i].xp
+                    xp: hiscore[i].xp,
                 }
                 await db.collection("temporalPlayer").insertOne(playerData)
             }
@@ -40,9 +40,9 @@ async function updateDB() {
                 if(player["dateUpdated"] != todaysDate) {
                     player["dateUpdated"] = todaysDate
                     player[todaysDate] = {
-                        levelDifference: hiscore[i].totalLevel,
+                        totalLevel: hiscore[i].totalLevel,
                         totalXP: hiscore[i].totalXp,
-                        xp: hiscore[i].xp
+                        xp: hiscore[i].xp,
                     }
                     playerData = player
                     await db.collection("temporalPlayer").replaceOne(filter, playerData)

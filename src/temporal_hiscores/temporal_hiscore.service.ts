@@ -67,6 +67,7 @@ export class TemporalHiscoreService {
     const startIndex = (page - 1) * limit;
     snapshot = snapshot.slice(startIndex, startIndex+limit)
     response["snapshot"] = snapshot
+    console.log(response)
     return response
   }
 
