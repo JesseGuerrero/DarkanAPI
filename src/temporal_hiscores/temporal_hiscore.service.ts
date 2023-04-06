@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import {BadRequestException, Inject, Injectable} from '@nestjs/common';
 import { WORLD_MONGODB_PROVIDER } from 'src/constants';
-
+import fetch from 'node-fetch';
 import slugify from 'slugify';
 import {ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface} from "class-validator";
 import {Utils} from "../util";
@@ -67,7 +67,6 @@ export class TemporalHiscoreService {
     const startIndex = (page - 1) * limit;
     snapshot = snapshot.slice(startIndex, startIndex+limit)
     response["snapshot"] = snapshot
-    console.log(response)
     return response
   }
 
@@ -91,6 +90,29 @@ export class TemporalHiscoreService {
     if (todaysData == undefined || pastData == undefined)
       return {}
 
+    let xpRanks = []
+    let levelsUp = []
+    let overallRank = -1
+    let overallLevelsUp = -1
+    for(let skill = -1; skill < 25; skill++) {
+      let response = await fetch(`http://localhost:8443/v1/temporal?daysBack=${daysBack}&limit=99999&skill=${skill}`);
+      let temporal = await response.json();
+      let snapshot = temporal["snapshot"]
+      for(let i = 0; i < snapshot.length; i++) {
+        let snapshotUser = Object.keys(snapshot[i])[0]
+        if(snapshotUser == username) {
+          if(skill == -1) {
+            overallRank = i+1
+            overallLevelsUp = snapshot[i][snapshotUser].levelDifference
+            break
+          }
+          xpRanks.push(i+1)
+          levelsUp.push(snapshot[i][snapshotUser].levelDifference)
+          break
+        }
+      }
+    }
+
     let xpDifferential = []
     for (let i = 0; i < todaysData.xp.length; i++)
       xpDifferential[i] = todaysData.xp[i] - pastData.xp[i]
@@ -98,7 +120,11 @@ export class TemporalHiscoreService {
       daysBack: daysBack,
       totalXp: todaysData.totalXP - pastData.totalXP,
       totalLevel: todaysData.totalLevel - pastData.totalLevel,
-      xpDifferential: xpDifferential
+      xpDifferential: xpDifferential,
+      xpRanks: xpRanks,
+      levelsUp: levelsUp,
+      overallRank: overallRank,
+      overallLevelsUp: overallLevelsUp
     }
     return differentialData
   }

@@ -48,7 +48,6 @@ async function updateDB() {
                     await db.collection("temporalPlayer").replaceOne(filter, playerData)
                 }
             }
-
         }
         console.log("Saved hiscore at " + todaysDate)
     } catch (e) {
