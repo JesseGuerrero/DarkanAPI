@@ -5,34 +5,45 @@ import fetch from 'node-fetch';
 import slugify from 'slugify';
 import {ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface} from "class-validator";
 import {Utils} from "../util";
+import {first} from "rxjs";
+
+//Make a day range
+//Use ChartJS to make charts like Rune Metrics
 
 @Injectable()
 export class TemporalHiscoreService {
   constructor(private readonly httpService: HttpService, @Inject(WORLD_MONGODB_PROVIDER) private readonly db: any) {}
 
-  async get(daysBack = 1, page = 1, limit = 6, skill = -1) {
-    daysBack = Number(daysBack)
+  async get(firstDayPast = 0, secondDayPast = 1, page = 1, limit = 6, skill = -1) {
+    firstDayPast = Number(firstDayPast)
+    secondDayPast = Number(secondDayPast)
+    if(firstDayPast >= secondDayPast)
+      return {error: "firstDayPast must be less than second day"}
     page = Number(page);
     limit = Number(limit);
     skill = Number(skill)
-    let response = {
-      daysBack: daysBack,
-      snapshot: []
-    }
 
-    let queryDate = new Date()
-    let filter = {date: queryDate.toDateString()};
-    let todayHiscore = await this.db.collection('temporal').find(filter).toArray();
-    let todaySnapshot = todayHiscore[0]["snapshot"]
+    let firstDate = new Date()
+    firstDate.setDate(firstDate.getDate() - firstDayPast)
+    let filter = {date: firstDate.toDateString()};
+    let firstHighscore = await this.db.collection('temporal').find(filter).toArray();
+    let firstSnapshot = firstHighscore[0]["snapshot"]
 
-    queryDate.setDate(queryDate.getDate() - daysBack)
-    filter = {date: queryDate.toDateString()};
+    let secondDate = new Date()
+    secondDate.setDate(secondDate.getDate() - secondDayPast)
+    filter = {date: secondDate.toDateString()};
     let daysBackHiscore = await this.db.collection('temporal').find(filter).toArray();
     let daysBackSnapshot = daysBackHiscore[0]["snapshot"]
     Object.keys(daysBackSnapshot)
+    let response = {
+      firstDayPast: firstDate.toDateString(),
+      secondDayPast: secondDate.toDateString(),
+      snapshot: []
+    }
+
 
     let snapshot = []
-    Object.keys(todaySnapshot).forEach(function (key) {
+    Object.keys(firstSnapshot).forEach(function (key) {
       let playerObject = {}
       playerObject[key] = {
         xpDifference: -1,
@@ -44,13 +55,13 @@ export class TemporalHiscoreService {
       }
       if(skill == -1)
         playerObject[key] = {
-          xpDifference: (todaySnapshot[key].totalXp - daysBackSnapshot[key].totalXp),
-          levelDifference: (todaySnapshot[key].totalLevel - daysBackSnapshot[key].totalLevel)
+          xpDifference: (firstSnapshot[key].totalXp - daysBackSnapshot[key].totalXp),
+          levelDifference: (firstSnapshot[key].totalLevel - daysBackSnapshot[key].totalLevel)
         }
       else
         playerObject[key] = {
-          xpDifference: (todaySnapshot[key].xp[skill] - daysBackSnapshot[key].xp[skill]),
-          levelDifference: (Utils.getSkillLevelByXP(todaySnapshot[key].xp[skill], skill) - Utils.getSkillLevelByXP(daysBackSnapshot[key].xp[skill], skill))
+          xpDifference: (firstSnapshot[key].xp[skill] - daysBackSnapshot[key].xp[skill]),
+          levelDifference: (Utils.getSkillLevelByXP(firstSnapshot[key].xp[skill], skill) - Utils.getSkillLevelByXP(daysBackSnapshot[key].xp[skill], skill))
         }
       snapshot.push(playerObject)
     });
@@ -71,12 +82,17 @@ export class TemporalHiscoreService {
   }
 
 
-  async getPlayer(username = "", daysBack = 1) {
-    daysBack = Number(daysBack)
+  async getPlayer(firstDayPast = 0, secondDayPast = 1, username = "") {
+    if(firstDayPast >= secondDayPast)
+      return {error: "first day must be less than second day"}
+    firstDayPast = Number(firstDayPast)
+    secondDayPast = Number(secondDayPast)
     username = Utils.formatNameForDisplay(username)
-    const todaysDate = new Date().toDateString()
+    let firstDayPastDate = new Date()
+    firstDayPastDate.setDate(firstDayPastDate.getDate() - firstDayPast)
+    const firstDay = firstDayPastDate.toDateString()
     let date = (new Date())
-    date.setDate(date.getDate() - daysBack)
+    date.setDate(date.getDate() - secondDayPast)
     const pastDate = date.toDateString()
 
     let filter = {username: username};
@@ -84,7 +100,7 @@ export class TemporalHiscoreService {
     if (playerData.length == 0)
       return {}
     playerData = playerData[0]
-    const todaysData = playerData[todaysDate]
+    const todaysData = playerData[firstDay]
     const pastData = playerData[pastDate]
 
     if (todaysData == undefined || pastData == undefined)
@@ -95,7 +111,7 @@ export class TemporalHiscoreService {
     let overallRank = -1
     let overallLevelsUp = -1
     for(let skill = -1; skill < 25; skill++) {
-      let response = await fetch(`http://localhost:8443/v1/temporal?daysBack=${daysBack}&limit=99999&skill=${skill}`);
+      let response = await fetch(`http://localhost:8443/v1/temporal?daysBack=${secondDayPast}&limit=99999&skill=${skill}`);
       let temporal = await response.json();
       let snapshot = temporal["snapshot"]
       for(let i = 0; i < snapshot.length; i++) {
@@ -117,7 +133,8 @@ export class TemporalHiscoreService {
     for (let i = 0; i < todaysData.xp.length; i++)
       xpDifferential[i] = todaysData.xp[i] - pastData.xp[i]
     let differentialData = {
-      daysBack: daysBack,
+      firstDayPast: firstDay,
+      secondDayPast: pastDate,
       totalXp: todaysData.totalXP - pastData.totalXP,
       totalLevel: todaysData.totalLevel - pastData.totalLevel,
       xpDifferential: xpDifferential,
